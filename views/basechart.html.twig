@@ -1,9 +1,69 @@
-{% extends "base.html.twig" %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>{% block title %}Hashtag analytics{% endblock %}</title>
+		{% block stylesheets %}
+			<link rel="stylesheet" type="text/css" href="css/style.css">
+		{% endblock %}
+	</head>
+	<body>
+		{% block body %}
 
-{% block title %}Hashtag analytics{% endblock %}
-{% block body %}
-	{% block chartform %} {% endblock %}
-	{% block chart %} {% endblock %}
-{% endblock %}
+			{# Formulario para elegir hashtags #}
 
+			{# Chart/selector de fechas #}
 
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+
+		{% endblock %}
+
+		{% block javascripts %}
+			<script type="text/javascript" src="js/jquery-2.0.0.js"></script>
+			<script type="text/javascript" src="js/jquery.flot.js"></script>
+			<script type="text/javascript">
+
+		var hashtagData = [];
+
+		function updateChart() {
+			$.get( "index.php/raw/get_hashtag_stats", function( data ) {
+				hashtagData = eval(data);
+				renderChart();
+			});
+		}
+
+		function renderChart() {
+			var plot = $.plot("#placeholder", hashtagData, {
+				series: {
+					lines: {
+						show: true
+					},
+					points: {
+						show: true
+					}
+				},
+				grid: {
+					hoverable: true,
+					clickable: true
+				},
+				xaxis: {
+					min: 0,
+					max: 50
+				},
+				yaxis: {
+					min: 0,
+					max: 50
+				}
+			});
+		}
+
+		$(document).ready(function(){
+			updateChart();
+		});
+
+		</script>
+		{% endblock %}
+	</body>
+</html>

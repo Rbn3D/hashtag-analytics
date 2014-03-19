@@ -4,21 +4,37 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 $app = new Silex\Application();
 
-$app->debug = true; // Quitar para producción
+define("SILEX_DEBUG", true);
 
-$app->register(new Silex\Provider\TwigServiceProvider(), array(
+
+if(SILEX_DEBUG) {
+	$app['debug'] = true; 
+
+	$app->register(new Silex\Provider\TwigServiceProvider(), array(
+	    'twig.path' => __DIR__ . '/../views',
+	    'twig.options' => array('debug' => true)
+	));
+	$app['twig']->addExtension(new Twig_Extensions_Extension_Debug());
+}
+else {
+	$app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/../views',
 ));
+}
+
+
+
+/*
+	   ---- Aplicación ----
+*/
+
 
 use Symfony\Component\HttpFoundation\Request;
 
-$app->get('/', function () {
+$app->get('/', function () use ($app) {
 
-	// TODO: renderizar plantilla con chart vacío
-
-	return 1;
+	return $app['twig']->render('basechart.html.twig', array());
 });
-
 
 $app->match('/raw/get_hashtag_stats', function (Request $request) {
 
@@ -40,7 +56,8 @@ $app->match('/raw/get_hashtag_stats', function (Request $request) {
 	$hashtags[] = array('data'=>$ht1, 'label'=>"#betis");
 	$hashtags[] = array('data'=>$ht2, 'label'=>"#sevilla");
 
-	$ret = array('success' => true, 'data' => $hashtags);
+	//$ret = array('success' => true, 'data' => $hashtags);
+	$ret = $hashtags;
 
 	return json_encode($ret);
 });
